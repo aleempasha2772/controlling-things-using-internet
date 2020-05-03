@@ -1,0 +1,112 @@
+  
+#include ESP8266WiFi.h
+
+const char ssid = ;enter your wifi username
+const char password = ;enter your wifi password
+ 
+int ledPin = 16;  GPIO16
+WiFiServer server(80);
+ 
+void setup() {
+  Serial.begin(9600);
+  delay(100);
+  pinMode(D5,OUTPUT);
+  digitalWrite(D5,LOW);
+  myservo.attach(D1);
+ 
+   Connect to WiFi network
+  Serial.println();
+  Serial.println();
+  Serial.print(Connecting to );
+  Serial.println(ssid);
+ 
+  WiFi.begin(ssid,password);
+ 
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(.);
+  }
+  Serial.println();
+  Serial.println(WiFi connected);
+ 
+   Start the server 
+  server.begin();   to begin the server keyword
+  Serial.println(Server started);
+ 
+   Print the IP address
+  Serial.print(Use this URL to connect );
+  Serial.print(http);
+  Serial.print(WiFi.localIP());
+  Serial.println();
+
+}
+ 
+void loop() {
+   Check if a client has connected
+  WiFiClient client = server.available();
+  if (!client) {
+    return;
+  }
+ 
+   Wait until the client sends some data
+  Serial.println(new client);
+  while(!client.available()){
+    delay(1);
+  }
+ 
+   Read the first line of the request
+  String request = client.readStringUntil('r');
+  Serial.println(request);
+  client.flush();
+  
+   Match the request
+ 
+  int value = LOW;
+  int pos=0;
+  if (request.indexOf(ON) != -1)  {
+    
+  for (pos = 0; pos = 90; pos += 10) {  goes from 0 degrees to 180 degrees
+     in steps of 1 degree
+    myservo.write(pos);               tell servo to go to position in variable 'pos'
+    delay(15);                        waits 15ms for the servo to reach the position
+  }      LED WILL GLOW BY GIVING IT LOW0 
+    value = LOW;
+  }
+  if (request.indexOf(OFF) != -1)  {
+     for (pos = 90; pos = 0; pos -= 10) {  goes from 180 degrees to 0 degrees
+    myservo.write(pos);               tell servo to go to position in variable 'pos'
+    delay(15);                        waits 15ms for the servo to reach the position
+  }     LED WILL OFF BY GIVING IT HIGH1
+    value = HIGH;
+  }
+ 
+ Set ledPin according to the request
+digitalWrite(ledPin, value);
+ 
+   Return the response
+  client.println(HTTP1.1 200 OK);
+  client.println(Content-Type texthtml);
+  client.println();   do not forget this one
+  client.println(!DOCTYPE HTML);
+  client.println(html);
+ 
+  client.print(Led pin is now );
+
+
+ 
+  if(value == HIGH) {
+    client.print(On);
+  } else {
+    client.print(Off);
+  }
+  client.println(brbr);
+  client.println(a href=ONbuttonTurn off buttona);
+  client.println(brbr);
+  client.println(a href=OFFbuttonTurn on buttonabr );  
+  client.println(html);
+ 
+  delay(1);
+  Serial.println(Client disonnected);
+  Serial.println();
+ 
+}
